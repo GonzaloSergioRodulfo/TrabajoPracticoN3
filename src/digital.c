@@ -47,17 +47,38 @@
 
 /* === Definicion y Macros privados ======================================== */
 
+#ifndef OUTPUT_INSTANCES
+    #define OUTPUT_INSTANCES    4
+
+#endif
+
+#ifndef INPUT_INSTANCES
+    #define INPUT_INSTANCES    4
+
+#endif
+
 /* === Declaraciones de tipos de datos privados ============================ */
 
 struct digital_output_s {
 
     uint8_t gpio;
     uint8_t bit;
+    bool allocated;
+};
+
+struct digital_input_s {
+
+    uint8_t gpio;
+    uint8_t bit;
+    bool allocated;
+    
 };
 
 /* === Definiciones de variables privadas ================================== */
 
-static struct digital_output_s instance;
+static struct digital_output_s instance_output[OUTPUT_INSTANCES] = {0};
+
+static struct digital_input_s instance_input[INPUT_INSTANCES] = {0};
 
 /* === Definiciones de variables publicas ================================== */
 
@@ -65,32 +86,96 @@ static struct digital_output_s instance;
 
 /* === Definiciones de funciones privadas ================================== */
 
+digital_output_t DigitalOutputAllocate(void){   
+
+    digital_output_t output = NULL;
+
+    for(int index = 0; index < OUTPUT_INSTANCES; index++){
+        if(instance_output[index].allocated == false) {
+            instance_output[index].allocated = true;
+            output = &instance_output[index];
+            break;
+        }
+
+    }
+    return output;
+
+}
+
+digital_input_t DigitalInputAllocate(void){   
+
+    digital_input_t input = NULL;
+
+    for(int index = 0; index < INPUT_INSTANCES; index++){
+        if(instance_input[index].allocated == false) {
+            instance_input[index].allocated = true;
+            input = &instance_input[index];
+            break;
+        }
+
+    }
+    return input;
+
+}
+
 /* === Definiciones de funciones publicas ================================== */
 
 digital_output_t DigitalOutputCreate(uint8_t gpio, uint8_t bit){
+    digital_output_t output = DigitalOutputAllocate();
 
-    instance.gpio = gpio;
-    instance.bit = bit;
+    if(output){
 
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, gpio, bit, false);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, gpio, bit, true);
+        output->gpio = gpio;
+        output->bit = bit;
+        Chip_GPIO_SetPinState(LPC_GPIO_PORT, output->gpio, output->bit, false);
+        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, output->gpio, output->bit, true);
 
-    return &instance;
+    }
+
+    return output;
 }
 void DigitalOutputActivate(digital_output_t output){
+    if(output){
 
                 Chip_GPIO_SetPinState(LPC_GPIO_PORT, output->gpio, output->bit, true);
-
+         }
 }
 void DigitalOutputDesactivate(digital_output_t output){
+    if(output){
 
                Chip_GPIO_SetPinState(LPC_GPIO_PORT, output->gpio, output->bit, false);
-
+    }
 }
 void DigitalOutputToggle(digital_output_t output){
+    if(output){
+    Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, output->gpio, output->bit);
+    }
+}
+
+
+
+digital_input_t DigitalInputCreate(uint8_t gpio, uint8_t bit){
+    digital_input_t input = DigitalinputAllocate();
+
+    if(input){
+
+        input->gpio = gpio;
+        input->bit = bit;
+        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, input->gpio, input->bit, false);
+
+    }
+
+    return input;
 
 }
 
+bool DigitalInputGetState(digital_input_t input){
+    bool state = false;
+    if(input){
+        state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, input->gpio, input->bit ) == 0 );
+    }
+    return state;
+}
 /* === Ciere de documentacion ============================================== */
 
 /** @} Final de la definición del modulo para doxygen */

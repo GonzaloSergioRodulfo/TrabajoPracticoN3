@@ -164,6 +164,11 @@ int main(void) {
     Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT, false);
 
     digital_output_t led_azul = DigitalOutputCreate(LED_B_GPIO, LED_B_BIT);
+    digital_output_t led_uno = DigitalOutputCreate(LED_1_GPIO, LED_1_BIT);
+    digital_output_t led_dos = DigitalOutputCreate(LED_2_GPIO, LED_2_BIT);
+    digital_output_t led_tres = DigitalOutputCreate(LED_3_GPIO, LED_3_BIT);
+
+    digital_input_t boton_1 = DigitalinputCreate(TEC_1_GPIO, TEC_1_BIT);
 
     while (true) {
         if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT) == 0) {
@@ -174,23 +179,30 @@ int main(void) {
             //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, false);
         }
 
-        current_state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0);
+        current_state = DigitalInputGetState(boton_1);
+        //(Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0);
         if ((current_state) && (!last_state)) {
-            Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_1_GPIO, LED_1_BIT);
+            DigitalOutputToggle(led_uno);
+
+
         }
         last_state = current_state;
 
         if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0) {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
+            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
+
+            DigitalOutputActivate(led_dos);
         }
         if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0) {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
+            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
+            DigitalOutputDesactivate(led_dos);
         }
 
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-            Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_3_GPIO, LED_3_BIT);
+            //Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_3_GPIO, LED_3_BIT);
+            DigitalOutputToggle(led_tres);
         }
 
         for (int index = 0; index < 100; index++) {
