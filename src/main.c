@@ -168,7 +168,7 @@ int main(void) {
     digital_output_t led_dos = DigitalOutputCreate(LED_2_GPIO, LED_2_BIT);
     digital_output_t led_tres = DigitalOutputCreate(LED_3_GPIO, LED_3_BIT);
 
-    digital_input_t boton_1 = DigitalinputCreate(TEC_1_GPIO, TEC_1_BIT);
+    digital_input_t boton_1 = DigitalInputCreate(TEC_1_GPIO, TEC_1_BIT);
 
     while (true) {
         if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT) == 0) {

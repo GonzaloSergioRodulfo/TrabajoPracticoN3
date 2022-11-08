@@ -71,6 +71,9 @@ struct digital_input_s {
     uint8_t gpio;
     uint8_t bit;
     bool allocated;
+    bool inverted;
+    bool last_state;
+
     
 };
 
@@ -155,7 +158,7 @@ void DigitalOutputToggle(digital_output_t output){
 
 
 digital_input_t DigitalInputCreate(uint8_t gpio, uint8_t bit){
-    digital_input_t input = DigitalinputAllocate();
+    digital_input_t input = DigitalInputAllocate();
 
     if(input){
 
@@ -175,7 +178,35 @@ bool DigitalInputGetState(digital_input_t input){
         state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, input->gpio, input->bit ) == 0 );
     }
     return state;
+
 }
+
+
+bool DigitalInputHasActivated(digital_input_t input) {
+    bool state = DigitalInputGetState(input);
+    bool result = state && !input->last_state;
+    input->last_state = state;
+    return result;
+}
+
+
+
+bool DigitalInputHasDesactivated(digital_input_t input) {
+    bool state = DigitalInputGetState(input);
+    bool result = !state && !input->last_state;
+    input->last_state = state;
+    return result;
+}
+
+
+
+bool DigitalInputHasChanged(digital_input_t input){
+    bool state = DigitalInputGetState(input);
+    bool result = state != input->last_state;
+    input->last_state = state;
+    return result;
+}
+
 /* === Ciere de documentacion ============================================== */
 
 /** @} Final de la definición del modulo para doxygen */
